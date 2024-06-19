@@ -1,8 +1,6 @@
 package com.tutorial.user_service.Model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -10,4 +8,9 @@ import lombok.NoArgsConstructor;
 public class Car {
     private String brand;
     private String model;
+    private int userId;
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 }

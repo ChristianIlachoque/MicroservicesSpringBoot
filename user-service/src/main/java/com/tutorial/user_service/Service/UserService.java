@@ -1,6 +1,8 @@
 package com.tutorial.user_service.Service;
 
 import com.tutorial.user_service.Entity.User;
+import com.tutorial.user_service.FeignClients.BikeFeignClient;
+import com.tutorial.user_service.FeignClients.CarFeignClient;
 import com.tutorial.user_service.Model.Car;
 import com.tutorial.user_service.Model.Bike;
 import com.tutorial.user_service.Repository.UserRepository;
@@ -8,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -17,6 +21,12 @@ public class UserService {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    CarFeignClient carFeignClient;
+
+    @Autowired
+    BikeFeignClient bikeFeignClient;
 
     public List<User> getALl(){
         return userRepository.findAll();
@@ -38,5 +48,35 @@ public class UserService {
     public List<Bike> getBikes(int userId){
         List<Bike> bikes = restTemplate.getForObject("http://localhost:8003/bike/byuser/" + userId, List.class);
         return bikes;
+    }
+
+    public Car saveCar(int userId, Car car){
+        car.setUserId(userId);
+        Car newCar = carFeignClient.save(car);
+        return newCar;
+    }
+
+    public Bike saveBike(int userId, Bike bike){
+        bike.setUserId(userId);
+        Bike newBike = bikeFeignClient.save(bike);
+        return newBike;
+    }
+
+    public Map<String, Object> getUserAndVehicles(int userId){
+        Map<String, Object> result = new HashMap<>();
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null){
+            result.put("Mensaje", "No existe el usuario");
+        }
+        result.put("User", user);
+        List<Car> cars = carFeignClient.getCars(userId);
+        if(cars.isEmpty()) result.put("Cars", "Usuario no tiene coches");
+        else result.put("Cars", cars);
+
+        List<Bike> bikes = bikeFeignClient.getBikes(userId);
+        if(bikes.isEmpty()) result.put("Bikes", "Usuario no tiene bicicletas");
+        else result.put("Bikes", bikes);
+
+        return result;
     }
 }

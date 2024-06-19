@@ -10,4 +10,9 @@ import lombok.NoArgsConstructor;
 public class Bike {
     private String brand;
     private String model;
+    private int userId;
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 }
